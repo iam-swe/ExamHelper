@@ -5,7 +5,6 @@ Main entry point for the Exam helper System.
 import structlog
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
 from app.agents.agent_factory import create_multi_agent_workflow
@@ -20,9 +19,9 @@ def create_app(conversation_id: str | None = None) -> MultiAgentWorkflow:
     Args:
         conversation_id: Optional conversation ID to resume an existing conversation
     """
-    logger.info("Initializing Encode Therapy System")
+    logger.info("Intialising Exam Helper Application")
     workflow = create_multi_agent_workflow(conversation_id)
-    logger.info("Encode Therapy System initialized successfully")
+    logger.info("Exam Helper Application initialized successfully :))")
     return workflow
 
 
@@ -34,7 +33,7 @@ def run(query: str, conversation_id: str | None = None) -> str:
         conversation_id: Optional conversation ID to resume an existing conversation
 
     Returns:
-        The therapist's response
+        The assistant's response
     """
     workflow = create_app(conversation_id)
     response = workflow.chat(query)
@@ -42,19 +41,17 @@ def run(query: str, conversation_id: str | None = None) -> str:
 
 
 def run_interactive_session(conversation_id: str | None = None) -> None:
-    """Run an interactive therapy session with continuous conversation."""
+    """Run an interactive session with continuous conversation."""
     workflow = create_app(conversation_id)
 
     print("\n" + "=" * 50)
-    print("Welcome to Encode Therapy System")
+    print("Welcome to Exam Helper System")
     print("Type 'quit' or 'exit' to end the session")
     print("=" * 50 + "\n")
 
-    # Get initial greeting from orchestrator (empty message triggers greeting)
     initial_response = workflow.get_greeting()
-    print(f"Therapist: {initial_response}\n")
+    print(f"Mentor: {initial_response}\n")
 
-    # Interactive conversation loop
     while True:
         try:
             user_input = input("You: ").strip()
@@ -63,14 +60,14 @@ def run_interactive_session(conversation_id: str | None = None) -> None:
                 continue
 
             if user_input.lower() in ["quit", "exit", "bye", "goodbye"]:
-                print("\nTherapist: Take care of yourself. Remember, it's okay to reach out whenever you need support. Goodbye!\n")
+                print("\nMentor: All the best :)) You will do well!! Dont worry : )) Goodbye!\n")
                 break
 
             response = workflow.chat(user_input)
-            print(f"\nTherapist: {response}\n")
+            print(f"\nMentor: {response}\n")
 
         except KeyboardInterrupt:
-            print("\n\nTherapist: Take care! Feel free to come back anytime.\n")
+            print("\n\nMentor: All the best :)) You will do well!! Dont worry : )) Goodbye!\n")
             break
         except EOFError:
             print("\n\nSession ended.\n")
@@ -86,11 +83,9 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) > 1:
-        # Get query from command line arguments
         query = " ".join(sys.argv[1:])
         response = run(query)
-        print(f"\nTherapist: {response}\n")
+        print(f"\nMentor: {response}\n")
     else:
-        # Start a session with greeting first
         start_session()
 

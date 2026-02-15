@@ -162,7 +162,7 @@ class MultiAgentWorkflow:
             logger.error("Workflow processing failed", error=str(e))
             return {
                 "success": False,
-                "response": "I'm here to listen. How are you feeling?",
+                "response": "Hi there! What's up?",
                 "error": str(e),
             }
 
@@ -194,7 +194,7 @@ class MultiAgentWorkflow:
             logger.error("Workflow processing failed", error=str(e))
             return {
                 "success": False,
-                "response": "I'm here to listen. How are you feeling?",
+                "response": "Hi there! What's up?",
                 "error": str(e),
             }
 
@@ -208,12 +208,12 @@ class MultiAgentWorkflow:
                 if not getattr(msg, "tool_calls", None):
                     return msg.content
 
-        return "I'm here to listen. How are you feeling?"
+        return "Hi there! What's up?"
 
     def chat(self, user_message: str) -> str:
         """Simple chat interface that returns just the response string."""
         result = self.process_query(user_message)
-        return result.get("response", "I'm here to listen. How are you feeling?")
+        return result.get("response", "Hi there! What's up?")
 
     def get_greeting(self) -> str:
         """Get initial greeting from the orchestrator."""
@@ -221,18 +221,18 @@ class MultiAgentWorkflow:
             model = self.orchestrator_node.orchestrator_agent.model
 
             response = model.invoke(
-                "You are a warm, supportive therapy assistant. Generate a brief, welcoming greeting for a new user starting a therapy session. Ask how they're feeling today. Keep it to 1-2 sentences."
+                "You are a supportive exam helper. Generate a brief, welcoming greeting for a new user who is about to get help for exam from you. Keep it to 1-2 sentences."
             )
 
             if response and response.content:
                 return response.content
 
 
-            return "Hi there! I'm here to support you. How are you feeling today?"
+            return "Hi there! What's up?"
 
         except Exception as e:
             logger.error("Failed to get greeting", error=str(e))
-            return "Hi there! I'm here to support you. How are you feeling today?"
+            return "Hi there! What's up?"
 
     def reset(self) -> None:
         """Reset the conversation state and start a new conversation."""
