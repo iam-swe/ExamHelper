@@ -212,6 +212,9 @@ Conclusion:
 Normalization is an essential technique in relational database design that organizes data into well-structured relations,
 reduces redundancy, and ensures data integrity.
 
+CONVERSATION CONTEXT:
+{context}
+
 """
 
 class LearnerAgent(BaseAgent):
@@ -257,7 +260,12 @@ class LearnerAgent(BaseAgent):
                 SystemMessage(content=prompt),
                 HumanMessage(content=query),
             ]
+            print("************************************")
+            print("PROMPT ",prompt)
+            print("Messages: ",messages[0],messages[1])
             response = await self.model.ainvoke(messages)
+            print("Response")
+            print(response)
 
             return {
                 "success": True,

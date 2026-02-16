@@ -5,6 +5,7 @@ Implements a LangGraph workflow that orchestrates multiple therapy agents
 in a coordinated manner
 """
 
+from langchain_core.messages import ToolMessage
 import os
 from typing import Any, Dict, List, Optional
 
@@ -198,12 +199,18 @@ class MultiAgentWorkflow:
                 "error": str(e),
             }
 
+
     def _extract_response(self, state: ExamHelperState) -> str:
-        """Extract the final response from state."""
+        messages = state.get("messages", [])
+
+        for msg in reversed(messages):
+            if isinstance(msg, ToolMessage) and msg.content:
+                return msg.content
+
         if state.get("current_response"):
             return state["current_response"]
 
-        for msg in reversed(state.get("messages", [])):
+        for msg in reversed(messages):
             if isinstance(msg, AIMessage) and msg.content:
                 if not getattr(msg, "tool_calls", None):
                     return msg.content
