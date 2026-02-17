@@ -14,6 +14,9 @@ from app.agents.base_agent import BaseAgent
 from app.agents.llm_models import LLMModels
 from app.agents.state import ExamHelperState
 from app.models.response_models import ExamHelperResponse
+from langgraph.prebuilt import create_react_agent
+
+from app.tools.firecrawl_tool import get_learner_tools
 
 logger = structlog.get_logger(__name__)
 
@@ -68,6 +71,24 @@ kind of answer. Use diagrams if required.
 - Ensure that the answer is optimised to score maximum marks 
 - Review for technical accuracy, clarity and consistency 
 
+TOOLS:
+You have access to a tool that retrieves high-quality academic and explanatory content.
+
+Use the tool when:
+- The topic requires deeper factual enrichment beyond core textbook knowledge
+- You need real-world applications, recent developments, case studies, or authoritative definitions
+- The user asks for detailed study material that would benefit from external references
+
+Do NOT use the tool when:
+- The concept is a standard university syllabus topic that can be fully explained from your internal knowledge
+- The question is purely theoretical and does not require external enrichment
+- You already have sufficient information to generate a complete, high-quality exam answer
+
+HOW TO USE THE TOOL OUTPUT:
+- Do NOT copy the retrieved content as it is
+- Extract only the relevant concepts
+- Integrate them into the structured exam-ready answer format
+- Ensure the final answer is cohesive and not a collection of pasted text
 
 FEW SHOT EXAMPLES: 
 EXAMPLE 1: 
@@ -217,6 +238,32 @@ CONVERSATION CONTEXT:
 
 """
 
+def _extract_text_from_message(message) -> str:
+    """
+    Convert structured message into a clean string.
+
+    Handles:
+    - Gemini content blocks (list of dicts)
+    - plain string segments
+    - mixed content safely
+    """
+    content = message.content
+
+    if isinstance(content, list):
+        parts = []
+
+        for block in content:
+            if isinstance(block, dict):
+                parts.append(block.get("text", ""))
+            elif isinstance(block, str):
+                parts.append(block)
+            else:
+                parts.append(str(block))
+
+        return "\n".join(p for p in parts if p.strip())
+
+    return content
+
 class LearnerAgent(BaseAgent):
     """Agent for handling queries related to providing easy to grasp learning material"""
 
@@ -251,27 +298,34 @@ class LearnerAgent(BaseAgent):
         query: str,
         state: Optional[ExamHelperState] = None,
     ) -> Dict[str, Any]:
-        """Process a query and provide relatded learning material"""
+        """Process a query and provide related learning material"""
         try:
-            from langchain_core.messages import HumanMessage, SystemMessage
+            from langchain_core.messages import HumanMessage
 
             prompt = self.get_prompt(state)
-            messages = [
-                SystemMessage(content=prompt),
-                HumanMessage(content=query),
-            ]
-            print("************************************")
-            print("PROMPT ",prompt)
-            print("Messages: ",messages[0],messages[1])
-            response = await self.model.ainvoke(messages)
-            print("Response")
-            print(response)
+
+            agent = create_react_agent(
+                model=self.model,
+                tools=get_learner_tools(),
+                prompt=prompt,
+            )
+
+            result = await agent.ainvoke(
+                {
+                    "messages": [
+                        HumanMessage(content=query)
+                    ]
+                }
+            )
+
+            final_output = _extract_text_from_message(result["messages"][-1])
 
             return {
                 "success": True,
-                self.get_result_key(): response.content,
+                self.get_result_key(): final_output,
                 "error": [],
             }
+
         except Exception as e:
             logger.error("Learner agent processing failed", error=str(e))
             return {

@@ -5,6 +5,7 @@ These tools wrap the actual therapy agent instances so the orchestrator
 delegates to them rather than duplicating agent logic inline.
 """
 
+import asyncio
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
@@ -42,18 +43,14 @@ def _create_agent_tool_fn(agent_class):
     def agent_tool_fn(message: str, context: str = "") -> str:
         agent = _get_agent(agent_class)
         state = _build_state_from_context(context)
-        prompt = agent.get_prompt(state)
-        messages = [
-            SystemMessage(content=prompt),
-            HumanMessage(content=message),
-        ]
-        response = _call_llm(agent.model, messages)
-        return response.content
+
+        result = asyncio.run(
+             agent.process_query(message, state)
+        )
+
+        return result.get(agent.get_result_key(), "")
 
     return agent_tool_fn
-
-def _call_llm(model, messages):
-    return model.invoke(messages)
 
 def _build_tools():
     """Build all agent tools. Imports are deferred to avoid circular imports."""
