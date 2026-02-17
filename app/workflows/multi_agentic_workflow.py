@@ -5,7 +5,6 @@ Implements a LangGraph workflow that orchestrates multiple therapy agents
 in a coordinated manner
 """
 
-from langchain_core.messages import ToolMessage
 import os
 from typing import Any, Dict, List, Optional
 
@@ -151,7 +150,7 @@ class MultiAgentWorkflow:
 
             self._save_conversation()
 
-            response = self._extract_response(final_state)
+            response = final_state.get("current_response", "Hi there! What's up?")
 
             return {
                 "success": True,
@@ -183,7 +182,7 @@ class MultiAgentWorkflow:
 
             self._save_conversation()
 
-            response = self._extract_response(final_state)
+            response = final_state.get("current_response", "Hi there! What's up?")
 
             return {
                 "success": True,
@@ -198,24 +197,6 @@ class MultiAgentWorkflow:
                 "response": "Hi there! What's up?",
                 "error": str(e),
             }
-
-
-    def _extract_response(self, state: ExamHelperState) -> str:
-        messages = state.get("messages", [])
-
-        for msg in reversed(messages):
-            if isinstance(msg, ToolMessage) and msg.content:
-                return msg.content
-
-        if state.get("current_response"):
-            return state["current_response"]
-
-        for msg in reversed(messages):
-            if isinstance(msg, AIMessage) and msg.content:
-                if not getattr(msg, "tool_calls", None):
-                    return msg.content
-
-        return "Hi there! What's up?"
 
     def chat(self, user_message: str) -> str:
         """Simple chat interface that returns just the response string."""

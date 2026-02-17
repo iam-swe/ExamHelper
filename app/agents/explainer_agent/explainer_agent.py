@@ -3,7 +3,6 @@ Explainer Agent
 
 Helps user understand a certain concept easily, in a way that they can grasp
 """
-
 from typing import Any, Dict, Optional
 
 import structlog

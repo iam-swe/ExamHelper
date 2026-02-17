@@ -6,9 +6,9 @@ from typing import Any, Dict
 import structlog
 
 from app.agents.base_agent import BaseAgent
-from app.agents.state import ExamHelperState, get_conversation_context
+from app.agents.state import ExamHelperState
 from app.utils.intent_detector import detect_intent
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.prebuilt import create_react_agent
 from app.tools.exam_helper_tools import get_agent_tools
 
@@ -46,11 +46,23 @@ class OrchestratorNode:
             )
 
             result = agent.invoke({"messages": state.get("messages", [])})
+            orchestrator_response = ""
+            ai_message=""
+
+            for msg in reversed(result.get("messages", [])):
+                if isinstance(msg, ToolMessage) and msg.content:
+                    orchestrator_response = msg.content
+                    break
+                if isinstance(msg, AIMessage) and msg.content and not getattr(msg, "tool_calls", None):
+                    ai_message = msg.content
+
+            if orchestrator_response == "":
+                orchestrator_response = ai_message
 
             return {
                 "messages": result.get("messages", []),
                 "user_intent": current_intent,
-                "orchestrator_result": result,
+                "orchestrator_result": orchestrator_response,
             }
 
         except Exception as e:

@@ -2,7 +2,7 @@
 State definition for the agent workflow.
 """
 
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, List, Optional
 
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
@@ -19,7 +19,7 @@ class ExamHelperState(TypedDict):
     turn_count: int
     current_response: Optional[str]
     error: List[str]
-    orchestrator_result: Optional[Dict[str, Any]]
+    orchestrator_result: Optional[str]
 
 
 def get_conversation_context(state: ExamHelperState, max_messages: int = 6) -> str:

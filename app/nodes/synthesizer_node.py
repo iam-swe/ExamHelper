@@ -22,20 +22,7 @@ class SynthesizerNode:
     def process(self, state: ExamHelperState) -> Dict[str, Any]:
         """Process and polish the current response."""
         try:
-            response_to_polish = state.get("current_response", "")
-
-            if not response_to_polish:
-                for msg in reversed(state.get("messages", [])):
-                    if isinstance(msg, AIMessage) and msg.content:
-                        if not getattr(msg, "tool_calls", None):
-                            response_to_polish = msg.content
-                            break
-
-            if not response_to_polish:
-                response_to_polish = "I'm here to listen. How are you feeling?"
-
-            result = self.synthesizer_agent.synthesize_sync(response_to_polish)
-            polished_response = result.get("polished_response", response_to_polish)
+            polished_response = state.get("orchestrator_result", "")
 
             new_messages = list(state.get("messages", []))
             for i in range(len(new_messages) - 1, -1, -1):
