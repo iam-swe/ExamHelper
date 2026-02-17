@@ -14,7 +14,7 @@ from app.agents.base_agent import BaseAgent
 from app.agents.llm_models import LLMModels
 from app.agents.state import ExamHelperState
 from app.models.response_models import ExamHelperResponse
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 
 from app.tools.firecrawl_tool import get_learner_tools
 
@@ -304,10 +304,10 @@ class LearnerAgent(BaseAgent):
 
             prompt = self.get_prompt(state)
 
-            agent = create_react_agent(
+            agent = create_agent(
                 model=self.model,
                 tools=get_learner_tools(),
-                prompt=prompt,
+                system_prompt=prompt,
             )
 
             result = await agent.ainvoke(
