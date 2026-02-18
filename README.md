@@ -7,7 +7,6 @@ Follow the steps below to set up the project on Windows or macOS.
 ## ⚙️ Prerequisites
 
 - Python 3.11 – 3.13 recommended
-(3.13 is the safest cross-platform choice)
 
 - Git
 
@@ -32,11 +31,13 @@ brew install uv
 ```
 
 OR
+
+#### Windows
 ```
 pip install uv
 ```
 
-#### Windows (PowerShell – Recommended)
+#### Windows (PowerShell)
 ```
 powershell -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
@@ -110,12 +111,18 @@ You can also run Python directly without activating:
 
 Copy the example env file:
 
+#### macOS
 ```
 cp .env.example .env
 ```
 
+#### Windows
+```
+copy .env.example
+```
 
-Fill in the following:
+
+Fill in the following in the .env file:
 
 ```
 GEMINI_API_KEY=your_google_ai_studio_key
