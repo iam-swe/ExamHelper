@@ -33,13 +33,6 @@ class AgentFactoryConfig(BaseModel):
             temperature=0.7,
         )
     )
-    synthesizer_agent: AgentConfig = Field(
-        default_factory=lambda: AgentConfig(
-            model_name=LLMModels.GEMINI_2_5_FLASH,
-            temperature=0.5,
-        )
-    )
-
     def get_config(self, agent_name: str) -> AgentConfig:
         """Get config for a specific agent by name."""
         config: AgentConfig = getattr(self, agent_name, None)

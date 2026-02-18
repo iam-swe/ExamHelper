@@ -12,7 +12,6 @@ from app.agents.agent_types import (
     ORCHESTRATOR_NAME,
     LEARNER_AGENT_NAME,
     EXPLAINER_AGENT_NAME,
-    SYNTHESIZER_AGENT_NAME,
 )
 from app.agents.llm_models import LLMModels
 
@@ -70,22 +69,9 @@ class AgentRegistry:
         )
 
     @classmethod
-    def get_synthesizer_agent(cls) -> AgentDefinition:
-        from app.agents.synthesizer_agent.synthesizer_agent import SynthesizerAgent
-
-        return AgentDefinition(
-            name=SYNTHESIZER_AGENT_NAME,
-            display_name="Synthesizer Agent",
-            agent_class=SynthesizerAgent,
-            default_model=LLMModels.GEMINI_2_5_FLASH,
-            default_temperature=0.5,
-        )
-
-    @classmethod
     def get_all_agents(cls) -> list[AgentDefinition]:
         return [
             cls.get_orchestrator(),
             cls.get_explainer_agent(),
             cls.get_learner_agent(),
-            cls.get_synthesizer_agent(),
         ]

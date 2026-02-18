@@ -17,7 +17,6 @@ from langgraph.graph.state import CompiledStateGraph
 from app.agents.state import ExamHelperState, get_initial_state
 from app.utils.conversation_store import get_conversation_store
 from app.nodes.orchestrator_node import OrchestratorNode
-from app.nodes.synthesizer_node import SynthesizerNode
 
 
 logger = structlog.get_logger(__name__)
@@ -33,20 +32,15 @@ class MultiAgentWorkflow:
         Orchestrator (routes to appropriate agent)
              |
              v
-        Synthesizer (polish response)
-             |
-             v
         User Response
     """
 
     def __init__(
         self,
         orchestrator_node: OrchestratorNode,
-        synthesizer_node: SynthesizerNode,
         conversation_id: Optional[str] = None,
     ) -> None:
         self.orchestrator_node = orchestrator_node
-        self.synthesizer_node = synthesizer_node
         self.conversation_store = get_conversation_store()
 
         self.memory = MemorySaver()
@@ -66,11 +60,9 @@ class MultiAgentWorkflow:
         workflow = StateGraph(ExamHelperState)
 
         workflow.add_node("orchestrator", self.orchestrator_node.process)
-        workflow.add_node("synthesizer", self.synthesizer_node.process)
 
         workflow.add_edge(START, "orchestrator")
-        workflow.add_edge("orchestrator", "synthesizer")
-        workflow.add_edge("synthesizer", END)
+        workflow.add_edge("orchestrator", END)
 
         return workflow.compile(checkpointer=self.memory)
 
@@ -150,7 +142,7 @@ class MultiAgentWorkflow:
 
             self._save_conversation()
 
-            response = final_state.get("current_response", "Hi there! What's up?")
+            response = final_state.get("orchestrator_result", "Hi there! What's up?")
 
             return {
                 "success": True,
@@ -182,7 +174,7 @@ class MultiAgentWorkflow:
 
             self._save_conversation()
 
-            response = final_state.get("current_response", "Hi there! What's up?")
+            response = final_state.get("orchestrator_result", "Hi there! What's up?")
 
             return {
                 "success": True,

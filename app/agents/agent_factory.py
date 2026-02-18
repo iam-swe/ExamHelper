@@ -10,14 +10,11 @@ from app.agents import (
     OrchestratorAgent,
     ExplainerAgent,
     LearnerAgent,
-    SynthesizerAgent,
-    
 )
 from app.agents.agent_types import (
     ORCHESTRATOR_NAME,
     EXPLAINER_AGENT_NAME,
     LEARNER_AGENT_NAME,
-    SYNTHESIZER_AGENT_NAME,
 )
 from app.agents.config import AgentConfig, AgentFactoryConfig
 
@@ -64,11 +61,6 @@ def initialize_agents(config: AgentFactoryConfig | None = None) -> None:
         LearnerAgent,
         config.learner_agent,
     )
-    _singletons[SYNTHESIZER_AGENT_NAME] = _create_agent_with_config(
-        SYNTHESIZER_AGENT_NAME,
-        SynthesizerAgent,
-        config.synthesizer_agent,
-    )
 
     _initialized = True
     logger.info("All agents initialized successfully")
@@ -88,20 +80,16 @@ def create_multi_agent_workflow(conversation_id: str | None = None) -> "MultiAge
         conversation_id: Optional conversation ID to resume an existing conversation
     """
     from app.nodes.orchestrator_node import OrchestratorNode
-    from app.nodes.synthesizer_node import SynthesizerNode
     from app.workflows.multi_agentic_workflow import MultiAgentWorkflow
 
     if not _initialized:
         initialize_agents()
 
     orchestrator_agent = cast(OrchestratorAgent, _singletons.get(ORCHESTRATOR_NAME))
-    synthesizer_agent = cast(SynthesizerAgent, _singletons.get(SYNTHESIZER_AGENT_NAME))
 
     orchestrator_node = OrchestratorNode(orchestrator_agent)
-    synthesizer_node = SynthesizerNode(synthesizer_agent)
 
     return MultiAgentWorkflow(
         orchestrator_node=orchestrator_node,
-        synthesizer_node=synthesizer_node,
         conversation_id=conversation_id,
     )

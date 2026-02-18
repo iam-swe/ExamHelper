@@ -21,8 +21,3 @@ class OrchestratorResponse(BaseModel):
     context_summary: str = Field(description="Summary of conversation context")
     response: Optional[str] = Field(default=None, description="The final response")
 
-class SynthesizerResponse(BaseModel):
-    """Response format for the synthesizer agent."""
-
-    polished_response: str = Field(description="The polished, synthesized response")
-    changes_made: bool = Field(default=True, description="Whether changes were made to the original")

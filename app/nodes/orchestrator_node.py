@@ -21,6 +21,21 @@ class OrchestratorNode:
     def __init__(self, orchestrator_agent: BaseAgent) -> None:
         self.orchestrator_agent = orchestrator_agent
         
+    @staticmethod
+    def _extract_text(content) -> str:
+        """Extract text from content that may be a string or a list of content blocks."""
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            parts = []
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "text":
+                    parts.append(block["text"])
+                elif isinstance(block, str):
+                    parts.append(block)
+            return "\n".join(parts)
+        return str(content)
+
     def process(self, state: ExamHelperState) -> Dict[str, Any]:
         """Process the current state through the orchestrator."""
         try:
@@ -54,7 +69,7 @@ class OrchestratorNode:
                     orchestrator_response = msg.content
                     break
                 if isinstance(msg, AIMessage) and msg.content and not getattr(msg, "tool_calls", None):
-                    ai_message = msg.content
+                    ai_message = self._extract_text(msg.content)
 
             if orchestrator_response == "":
                 orchestrator_response = ai_message

@@ -20,7 +20,6 @@ class ExamHelperConfig(BaseModel):
     """Configuration for exam helper specific settings."""
 
     max_response_words: int = Field(default=200, description="Maximum words in response")
-    enable_synthesizer: bool = Field(default=True, description="Enable response synthesizer")
 
 
 class AppConfig(BaseModel):
@@ -51,7 +50,6 @@ class AppConfigLoader:
                 ),
                 exam_helper=ExamHelperConfig(
                     max_response_words=int(os.getenv("MAX_RESPONSE_WORDS", "200")),
-                    enable_synthesizer=os.getenv("ENABLE_SYNTHESIZER", "true").lower() == "true",
                 ),
             )
         return cls._instance
